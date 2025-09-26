@@ -10,14 +10,45 @@
     :style="cardStyle"
   >
     <template v-if="isHidden">
-      🎂
+      <div class="card-back-pattern">🎂</div>
+    </template>
+    <template v-else-if="card.special">
+      <!-- Carte speciali con immagine -->
+      <div class="card-special">
+        <!-- Immagine di sfondo -->
+        <div class="card-special-background">
+          <img 
+            :src="card.image" 
+            :alt="card.value" 
+            class="card-special-bg-image"
+            @error="onImageError"
+          />
+          <div class="card-special-bg-fallback">{{ card.value }}</div>
+        </div>
+        
+        <!-- Contenuto sovrapposto -->
+        <div class="card-special-overlay">
+          <div class="card-special-header">
+            <div class="card-special-title">{{ card.value }}</div>
+            <img 
+              :src="card.suit" 
+              :alt="card.suitName" 
+              class="card-special-suit"
+            />
+          </div>
+          <div class="card-special-value">{{ card.numValue[0] > 0 ? '+' : '' }}{{ card.numValue[0] }}</div>
+        </div>
+      </div>
     </template>
     <template v-else>
-      <div class="card-suit" :style="{ color: card.suitColor }">
-        {{ card.suit }}
-      </div>
-      <div class="card-value">
-        {{ card.value }}
+      <!-- Carte normali -->
+      <div class="card-content">
+        <div class="card-value-top">{{ card.value }}</div>
+        <img 
+          :src="card.suit" 
+          :alt="card.suitName" 
+          class="card-suit-svg"
+        />
       </div>
     </template>
   </div>
@@ -67,6 +98,12 @@ watch(() => props.isHidden, (newVal, oldVal) => {
     }, 1200) // Durata dell'animazione flip
   }
 })
+
+function onImageError(event) {
+  // Nascondi l'immagine e mostra il fallback
+  event.target.style.display = 'none'
+  event.target.nextElementSibling.style.display = 'flex'
+}
 
 onMounted(() => {
   wasHidden.value = props.isHidden

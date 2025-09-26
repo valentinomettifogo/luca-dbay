@@ -3,7 +3,7 @@
   
   <!-- Schermata Introduttiva -->
   <div v-if="game.currentScreen === 'intro'" class="intro-screen">
-    <h1 class="title">🎉 Luca's Birthday Game 🎉</h1>
+    <h1 class="title">🎉 Luca's Bday Game 🎉</h1>
     
     <div class="intro-content">
       <div class="game-explanation">
@@ -32,10 +32,6 @@
       <h2 class="game-title">Partita {{ game.games + 1 }}</h2>
       <div class="mini-progress">{{ game.wins }}/5 🏆</div>
     </div>
-    
-
-    
-    <div class="message" :class="messageClass" v-html="message"></div>
     
     <!-- Sezione Dealer -->
     <div class="dealer-section">
@@ -82,6 +78,24 @@
       @continue="continueGame"
       @restart="backToStart"
     />
+    
+    <!-- 🚀 PANNELLO DEBUG - Solo in modalità sviluppo -->
+    <div v-if="isDev" class="debug-panel">
+      <details class="debug-details">
+        <summary>🔧 Debug</summary>
+        <div class="debug-buttons">
+          <button @click="debugWin" class="debug-btn debug-win">
+            🏆 Vittoria + Effetti
+          </button>
+          <button @click="debugInstantWin" class="debug-btn debug-instant">
+            ⚡ Vittoria Immediata
+          </button>
+          <button @click="debugTestVideo" class="debug-btn debug-video">
+            🎥 Test Video
+          </button>
+        </div>
+      </details>
+    </div>
   </div>
 
   <!-- Popup Congratulazioni -->
@@ -95,11 +109,32 @@
         <p>Che questo nuovo anno ti porti sempre<br>
         le carte giuste al momento giusto! 🎂🎈</p>
         <br>
-        <p class="popup-ps"><em>P.S. - Ora che sei diventato così bravo,<br>
-        forse è ora di sfidare qualcuno a Balatro! 😉</em></p>
+        <p>I tuoi amici (e Dado che puzza)</p>
       </div>
       <button class="popup-close" @click="closeCongratulations">
         🎊 Fantastico!
+      </button>
+    </div>
+  </div>
+
+  <!-- Popup Video di Vittoria -->
+  <div v-if="game.showVideoPopup" class="video-popup-overlay">
+    <div class="video-popup-content">
+      <div class="video-header">
+        <h2>🎉 HAI VINTO! 🎉</h2>
+        <p>Goditi questo momento epico!</p>
+      </div>
+      <div class="video-container">
+        <iframe
+          src="https://www.youtube.com/embed/3kyn9Es4HoY?autoplay=1&rel=0&modestbranding=1"
+          title="Victory Video"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+      </div>
+      <button class="video-close-btn" @click="closeVideoPopup">
+        ✨ Continua a Giocare!
       </button>
     </div>
   </div>
@@ -113,6 +148,8 @@ import ProgressBar from './components/ProgressBar.vue'
 import ScoreDisplay from './components/ScoreDisplay.vue'
 import GameCard from './components/GameCard.vue'
 import GameControls from './components/GameControls.vue'
+
+const gameComposable = useBlackjackGame()
 
 const {
   game,
@@ -132,6 +169,15 @@ const {
   continueGame,
   backToStart,
   goBackHome,
-  closeCongratulations
-} = useBlackjackGame()
+  closeCongratulations,
+  closeVideoPopup
+} = gameComposable
+
+// 🚀 Funzioni debug disponibili solo in dev
+const debugWin = gameComposable.debugWin || (() => {})
+const debugInstantWin = gameComposable.debugInstantWin || (() => {})
+const debugTestVideo = gameComposable.debugTestVideo || (() => {})
+
+// 🚀 Controllo ambiente di sviluppo
+const isDev = import.meta.env.DEV
 </script>

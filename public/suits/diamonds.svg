@@ -1,0 +1,16 @@
+<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .diamond { fill: #ff4757; stroke: #333; stroke-width: 2; }
+    </style>
+  </defs>
+  <!-- Cartoon diamond shape -->
+  <path d="M30 8
+           L45 30
+           L30 52
+           L15 30
+           L30 8 Z" 
+           class="diamond"/>
+  <!-- Cartoon highlight -->
+  <polygon points="30,8 38,20 30,30 22,20" fill="#ff6b7a" opacity="0.7"/>
+</svg>

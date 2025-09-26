@@ -39,6 +39,14 @@
     >
       🔄 Ricomincia
     </button>
+    
+    <button 
+      class="btn btn-secondary" 
+      :class="{ hidden: gameState !== 'tie' }"
+      @click="$emit('continue')"
+    >
+      🤝 Prossima Mano
+    </button>
   </div>
 </template>
 

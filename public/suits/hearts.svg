@@ -1,0 +1,18 @@
+<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .heart { fill: #ff4757; stroke: #333; stroke-width: 2; }
+    </style>
+  </defs>
+  <!-- Cartoon heart shape -->
+  <path d="M30 50 
+           C30 50, 15 35, 15 22
+           C15 15, 20 10, 27 10
+           C28 10, 29 11, 30 12
+           C31 11, 32 10, 33 10
+           C40 10, 45 15, 45 22
+           C45 35, 30 50, 30 50 Z" 
+           class="heart"/>
+  <!-- Cartoon highlight -->
+  <ellipse cx="24" cy="18" rx="4" ry="3" fill="#ff6b7a" opacity="0.7"/>
+</svg>

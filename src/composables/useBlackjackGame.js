@@ -3,10 +3,10 @@ import { ref, computed, nextTick } from 'vue'
 export function useBlackjackGame() {
   // Carte personalizzate con tema compleanno
   const suits = [
-    { symbol: '🎂', color: '#ff6b6b', name: 'torte' },
-    { symbol: '🎈', color: '#48dbfb', name: 'palloncini' },
-    { symbol: '🎁', color: '#feca57', name: 'regali' },
-    { symbol: '🎉', color: '#ff9ff3', name: 'feste' }
+    { symbol: '/suits/hearts.svg', color: '#ff4757', name: 'hearts' },
+    { symbol: '/suits/diamonds.svg', color: '#ff4757', name: 'diamonds' },
+    { symbol: '/suits/clubs.svg', color: '#2f3542', name: 'clubs' },
+    { symbol: '/suits/spades.svg', color: '#2f3542', name: 'spades' }
   ]
   
   const values = [
@@ -22,7 +22,11 @@ export function useBlackjackGame() {
     { symbol: '10', value: [10] },
     { symbol: 'J', value: [10] },
     { symbol: 'Q', value: [10] },
-    { symbol: 'K', value: [10] }
+    { symbol: 'K', value: [10] },
+    // Carte speciali con SVG inline
+    { symbol: 'DADO', value: [-5], special: true, image: '/custom/dado.png' },
+    { symbol: 'MARCO', value: [1], special: true, image: '/custom/marco-pika.png' },
+    { symbol: 'FABRIZIO', value: [22], special: true, image: '/custom/fabrizio.png' }
   ]
   
   // Stato reattivo del gioco
@@ -36,7 +40,8 @@ export function useBlackjackGame() {
     gameState: 'ready', // ready, playing, dealer, finished
     dealerHidden: true,
     currentScreen: 'intro', // 'intro', 'game'
-    showCongratulations: false
+    showCongratulations: false,
+    showVideoPopup: false
   })
   
   const message = ref('Benvenuto al Blackjack di Compleanno di Luca! 🎂<br>Batti il dealer 5 volte per sbloccare la sorpresa speciale!')
@@ -44,18 +49,19 @@ export function useBlackjackGame() {
   
   // Score del player con delay per le animazioni
   const playerDisplayScore = ref(0)
+  const dealerDisplayScore = ref('Score: ? + ?')
   
   // Computed properties
   const playerScore = computed(() => getHandValue(game.value.playerHand))
   const dealerScore = computed(() => getHandValue(game.value.dealerHand))
   
-  const dealerDisplayScore = computed(() => {
+  const dealerDisplayScoreFormatted = computed(() => {
     if (game.value.dealerHidden && game.value.dealerHand.length > 0) {
       const firstCard = game.value.dealerHand[0]
       const firstCardValue = firstCard.numValue[0] === 1 ? 11 : firstCard.numValue[0]
       return `Score: ${firstCardValue} + ?`
     }
-    return `Score: ${dealerScore.value}`
+    return dealerDisplayScore.value
   })
   
   const dealerHand = computed(() => {
@@ -84,12 +90,26 @@ export function useBlackjackGame() {
     game.value.deck = []
     for (let suit of suits) {
       for (let value of values) {
-        game.value.deck.push({
-          suit: suit.symbol,
-          suitColor: suit.color,
-          value: value.symbol,
-          numValue: value.value
-        })
+        // Carte speciali: 4 copie (una per ogni seme)
+        if (value.special) {
+          game.value.deck.push({
+            suit: suit.symbol, // Le carte speciali hanno anche un seme
+            suitColor: suit.color,
+            value: value.symbol,
+            numValue: value.value,
+            special: true,
+            image: value.image
+          })
+        } else {
+          // Carte normali: una per ogni seme
+          game.value.deck.push({
+            suit: suit.symbol,
+            suitColor: suit.color,
+            value: value.symbol,
+            numValue: value.value,
+            special: false
+          })
+        }
       }
     }
   }
@@ -128,11 +148,17 @@ export function useBlackjackGame() {
   
   function startFromIntro() {
     game.value.currentScreen = 'game'
+    message.value = ''
+    messageClass.value = ''
     dealNewHand()
   }
   
   function updatePlayerDisplayScore() {
     playerDisplayScore.value = getHandValue(game.value.playerHand)
+  }
+  
+  function updateDealerDisplayScore() {
+    dealerDisplayScore.value = `Score: ${getHandValue(game.value.dealerHand)}`
   }
   
   function dealNewHand() {
@@ -147,6 +173,9 @@ export function useBlackjackGame() {
     game.value.dealerHidden = true
     game.value.gameState = 'playing'
     playerDisplayScore.value = 0 // Reset del display score
+    dealerDisplayScore.value = 'Score: ? + ?'
+    message.value = ''
+    messageClass.value = ''
     
     // Distribuisci 2 carte a ciascuno
     game.value.playerHand.push(game.value.deck.pop())
@@ -154,41 +183,51 @@ export function useBlackjackGame() {
     game.value.playerHand.push(game.value.deck.pop())
     game.value.dealerHand.push(game.value.deck.pop())
     
-    // Aggiorna lo score del player dopo le animazioni delle prime carte (2 secondi dopo l'ultima carta)
+    // Aggiorna lo score del player dopo le animazioni delle prime carte
     setTimeout(() => {
       updatePlayerDisplayScore()
       
+      const playerScoreValue = getHandValue(game.value.playerHand)
+      
+      // Controlla sforamento immediato (es: Fabrizio + qualsiasi altra carta)
+      if (playerScoreValue > 21) {
+        game.value.currentStreak = 0
+        game.value.wins = 0
+        game.value.gameState = 'lost'
+        setTimeout(() => showLoseEffect(), 500)
+      } 
       // Controlla blackjack immediato
-      if (getHandValue(game.value.playerHand) === 21) {
+      else if (playerScoreValue === 21) {
         setTimeout(() => playerStand(), 1000)
       }
-    }, 2000)
+    }, 1600) // Tempo per 2 carte: 1000ms + 500ms + 100ms buffer
   }
   
   function hitPlayer() {
     if (game.value.gameState !== 'playing') return
     
+    // 1. Aggiungi la carta
     game.value.playerHand.push(game.value.deck.pop())
     
-    const playerScoreValue = getHandValue(game.value.playerHand)
+    // 2. L'animazione parte automaticamente (800ms)
     
-    // Aggiorna lo score dopo l'animazione della carta (2 secondi)
+    // 3. Dopo l'animazione, aggiorna score e controlla risultato
     setTimeout(() => {
       updatePlayerDisplayScore()
       
+      const playerScoreValue = getHandValue(game.value.playerHand)
+      
+      // 4. Controlla immediatamente se bust o blackjack
       if (playerScoreValue > 21) {
-        // Aspetta ancora un po' prima di mostrare il risultato
-        setTimeout(() => endGame('bust'), 2000)
+        game.value.currentStreak = 0
+        game.value.wins = 0
+        game.value.gameState = 'lost'
+        // Attende che l'utente veda il punteggio aggiornato prima dell'effetto
+        setTimeout(() => showLoseEffect(), 500)
       } else if (playerScoreValue === 21) {
         setTimeout(() => playerStand(), 500)
       }
-    }, 2000)
-    
-    // Se sballa, pulisce subito il messaggio
-    if (playerScoreValue > 21) {
-      message.value = ''
-      messageClass.value = ''
-    }
+    }, 900) // 800ms animazione + 100ms buffer
   }
   
   function playerStand() {
@@ -197,73 +236,94 @@ export function useBlackjackGame() {
     game.value.gameState = 'dealer'
     game.value.dealerHidden = false
     
-    // Logica del dealer - più tempo per vedere l'animazione flip
-    setTimeout(() => dealerPlay(), 2500)
+    // Aggiorna lo score del dealer dopo l'animazione flip
+    setTimeout(() => {
+      updateDealerDisplayScore()
+      
+      // Inizia la logica del dealer dopo aver aggiornato lo score
+      setTimeout(() => dealerPlay(), 500)
+    }, 1300) // 1200ms animazione flip + 100ms buffer
   }
   
   function dealerPlay() {
     const dealerScoreValue = getHandValue(game.value.dealerHand)
     
     if (dealerScoreValue < 17) {
+      // 1. Dealer prende automaticamente una carta
       game.value.dealerHand.push(game.value.deck.pop())
-      setTimeout(() => dealerPlay(), 2000)
+      
+      // 2. Attende l'animazione, poi aggiorna score e controlla
+      setTimeout(() => {
+        // 3. Aggiorna lo score
+        updateDealerDisplayScore()
+        
+        // 4. Controlla se bust
+        const newDealerScore = getHandValue(game.value.dealerHand)
+        if (newDealerScore > 21) {
+          game.value.wins++
+          game.value.currentStreak++
+          game.value.gameState = 'won'
+          // Attende che l'utente veda il punteggio aggiornato prima dell'effetto
+          setTimeout(() => {
+            if (game.value.wins >= 5) {
+              showFinalWinEffect() // Quinta vittoria: video + effetti
+              setTimeout(() => {
+                createMegaParticles()
+                game.value.showCongratulations = true
+                game.value.currentScreen = 'intro' // Prepara la schermata sottostante
+              }, 2000)
+            } else {
+              showWinEffect() // Vittorie 1-4: solo effetti normali
+            }
+          }, 500)
+        } else {
+          // Continua a giocare
+          setTimeout(() => dealerPlay(), 500)
+        }
+      }, 900) // 800ms animazione + 100ms buffer
     } else {
-      // Aspetta un po' anche qui per dare tempo all'ultima carta del dealer di finire
-      setTimeout(() => endGame('compare'), 1500)
+      // Dealer sta, confronta i punteggi
+      endGame('compare')
     }
   }
   
   function endGame(reason) {
-    game.value.gameState = 'finished'
     game.value.games++
     
     const playerScoreValue = getHandValue(game.value.playerHand)
     const dealerScoreValue = getHandValue(game.value.dealerHand)
     
-    let result = ''
-    let isWin = false
-    
-    if (reason === 'bust') {
-      result = 'Sballato! Hai superato 21! 💥'
-      game.value.currentStreak = 0
-      messageClass.value = 'losing'
-    } else if (dealerScoreValue > 21) {
-      result = 'Il dealer è sballato! Hai vinto! 🎉'
-      isWin = true
-    } else if (playerScoreValue > dealerScoreValue) {
-      result = 'Hai vinto! Ottimo lavoro! 🎊'
-      isWin = true
-    } else if (playerScoreValue < dealerScoreValue) {
-      result = 'Il dealer ha vinto... Riprova! 😔'
-      game.value.currentStreak = 0
-      messageClass.value = 'losing'
-    } else {
-      result = 'Pareggio! Nessun vincitore! 🤝'
-      game.value.currentStreak = 0
-      messageClass.value = ''
-    }
-    
-    if (isWin) {
-      game.value.wins++
-      game.value.currentStreak++
-      messageClass.value = 'winning'
-      createParticles()
-      
-      // Cambia lo stato per mostrare il pulsante "continua" dopo una vittoria
-      game.value.gameState = 'won'
-      
-      if (game.value.wins >= 5) {
+    // Solo per confronto finale (non bust, che sono già gestiti)
+    if (reason === 'compare') {
+      if (playerScoreValue > dealerScoreValue) {
+        // Vittoria del player
+        game.value.wins++
+        game.value.currentStreak++
+        game.value.gameState = 'won'
         setTimeout(() => {
-          createMegaParticles()
-          game.value.showCongratulations = true
-        }, 1500)
+          if (game.value.wins >= 5) {
+            showFinalWinEffect() // Quinta vittoria: video + effetti
+            setTimeout(() => {
+              createMegaParticles()
+              game.value.showCongratulations = true
+              game.value.currentScreen = 'intro' // Prepara la schermata sottostante
+            }, 1800)
+          } else {
+            showWinEffect() // Vittorie 1-4: solo effetti normali
+          }
+        }, 300)
+      } else if (playerScoreValue < dealerScoreValue) {
+        // Vittoria del dealer
+        game.value.currentStreak = 0
+        game.value.wins = 0
+        game.value.gameState = 'lost'
+        setTimeout(() => showLoseEffect(), 300)
+      } else {
+        // Pareggio - mantiene la winstreak ma non progredisce
+        game.value.gameState = 'tie'
+        setTimeout(() => showTieEffect(), 300)
       }
-    } else {
-      // Cambia lo stato per mostrare il pulsante "ricomincia" dopo una sconfitta
-      game.value.gameState = 'lost'
     }
-    
-    message.value = result
   }
   
 
@@ -271,17 +331,14 @@ export function useBlackjackGame() {
   function continueGame() {
     // Continua il gioco dopo una vittoria - vai direttamente alla prossima partita
     game.value.currentScreen = 'game'
-    game.value.gameState = 'ready'
-    message.value = `Ottimo! Round ${game.value.games + 1} 🎯`
-    messageClass.value = ''
+    // Avvia direttamente una nuova mano
+    dealNewHand()
   }
   
   function backToStart() {
     // Torna alla schermata intro dopo una sconfitta
     game.value.currentScreen = 'intro'
     game.value.gameState = 'ready'
-    message.value = 'Benvenuto al Blackjack di Compleanno di Luca!'
-    messageClass.value = ''
   }
   
   function goBackHome() {
@@ -289,8 +346,111 @@ export function useBlackjackGame() {
     game.value.gameState = 'ready'
   }
   
+  // 🚀 FUNZIONI DI DEBUG - Solo in modalità sviluppo
+  function debugWin() {
+    if (!import.meta.env.DEV) return
+    if (import.meta.env.DEV) console.log('🎮 DEBUG: Vittoria forzata!')
+    game.value.wins++
+    game.value.currentStreak++
+    game.value.gameState = 'won'
+    if (game.value.wins >= 5) {
+      showFinalWinEffect() // Quinta vittoria: con video
+      setTimeout(() => {
+        createMegaParticles()
+        game.value.showCongratulations = true
+        game.value.currentScreen = 'intro' // Prepara la schermata sottostante
+      }, 2000)
+    } else {
+      showWinEffect() // Vittorie 1-4: senza video
+    }
+  }
+  
+  function debugInstantWin() {
+    if (!import.meta.env.DEV) return
+    if (import.meta.env.DEV) console.log('🎮 DEBUG: Vittoria istantanea con video!')
+    game.value.wins++
+    game.value.currentStreak++
+    game.value.gameState = 'won'
+    // Salta direttamente al video senza effetti
+    game.value.showVideoPopup = true
+  }
+  
+  function debugTestVideo() {
+    if (!import.meta.env.DEV) return
+    if (import.meta.env.DEV) console.log('🎮 DEBUG: Test video diretto!')
+    game.value.showVideoPopup = true
+  }
+  
   function closeCongratulations() {
     game.value.showCongratulations = false
+    // Reset completo dopo aver completato la sfida
+    game.value.wins = 0
+    game.value.games = 0
+    game.value.currentStreak = 0
+    game.value.gameState = 'ready'
+    game.value.currentScreen = 'intro'
+    // Reset anche le mani
+    game.value.playerHand = []
+    game.value.dealerHand = []
+    playerDisplayScore.value = 0
+    dealerDisplayScore.value = 'Score: ? + ?'
+  }
+  
+  function closeVideoPopup() {
+    game.value.showVideoPopup = false
+  }
+  
+  function showWinEffect() {
+    // Effetto schermo verde per vittoria
+    const gameScreen = document.querySelector('.game-screen')
+    if (gameScreen) {
+      gameScreen.classList.add('win-effect')
+      setTimeout(() => {
+        gameScreen.classList.remove('win-effect')
+      }, 2000)
+    }
+    
+    createParticles()
+  }
+  
+  function showFinalWinEffect() {
+    // Effetto speciale per la vittoria finale (quinta)
+    const gameScreen = document.querySelector('.game-screen')
+    if (gameScreen) {
+      gameScreen.classList.add('win-effect')
+      setTimeout(() => {
+        gameScreen.classList.remove('win-effect')
+      }, 2000)
+    }
+    
+    createParticles()
+    
+    // Mostra il video popup solo per la quinta vittoria
+    setTimeout(() => {
+      game.value.showVideoPopup = true
+    }, 1500)
+  }
+  
+  function showLoseEffect() {
+    // Effetto schermo rosso per sconfitta
+    const gameScreen = document.querySelector('.game-screen')
+    if (gameScreen) {
+      gameScreen.classList.add('lose-effect')
+      setTimeout(() => {
+        gameScreen.classList.remove('lose-effect')
+      }, 2000)
+    }
+  }
+  
+  function showTieEffect() {
+    // Effetto schermo giallo per pareggio
+    const gameScreen = document.querySelector('.game-screen')
+    if (gameScreen) {
+      gameScreen.classList.add('tie-effect')
+      setTimeout(() => {
+        gameScreen.classList.remove('tie-effect')
+      }, 2000)
+    }
   }
   
   function createParticles() {
@@ -339,13 +499,13 @@ export function useBlackjackGame() {
   createDeck()
   shuffleDeck()
   
-  return {
+  const exports = {
     game,
     message,
     messageClass,
     dealerHand,
     playerScore: playerDisplayScore,
-    dealerDisplayScore,
+    dealerDisplayScore: dealerDisplayScoreFormatted,
     isPlayerBlackjack,
     isPlayerBust,
     isDealerBlackjack,
@@ -357,6 +517,16 @@ export function useBlackjackGame() {
     continueGame,
     backToStart,
     goBackHome,
-    closeCongratulations
+    closeCongratulations,
+    closeVideoPopup
   }
+
+  // 🚀 Aggiungi funzioni di debug solo in modalità sviluppo
+  if (import.meta.env.DEV) {
+    exports.debugWin = debugWin
+    exports.debugInstantWin = debugInstantWin
+    exports.debugTestVideo = debugTestVideo
+  }
+
+  return exports
 }
