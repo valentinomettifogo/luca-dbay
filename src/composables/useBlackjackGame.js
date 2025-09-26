@@ -425,26 +425,20 @@ export function useBlackjackGame() {
   
   function showWinEffect() {
     // Effetto schermo verde per vittoria
-    const gameScreen = document.querySelector('.game-screen')
-    if (gameScreen) {
-      gameScreen.classList.add('win-effect')
-      setTimeout(() => {
-        gameScreen.classList.remove('win-effect')
-      }, 2000)
-    }
+    document.body.classList.add('win-effect')
+    setTimeout(() => {
+      document.body.classList.remove('win-effect')
+    }, 2000)
     
     createParticles()
   }
   
   function showFinalWinEffect() {
     // Effetto speciale per la vittoria finale (quinta)
-    const gameScreen = document.querySelector('.game-screen')
-    if (gameScreen) {
-      gameScreen.classList.add('win-effect')
-      setTimeout(() => {
-        gameScreen.classList.remove('win-effect')
-      }, 2000)
-    }
+    document.body.classList.add('win-effect')
+    setTimeout(() => {
+      document.body.classList.remove('win-effect')
+    }, 2000)
     
     createParticles()
     
@@ -456,24 +450,18 @@ export function useBlackjackGame() {
   
   function showLoseEffect() {
     // Effetto schermo rosso per sconfitta
-    const gameScreen = document.querySelector('.game-screen')
-    if (gameScreen) {
-      gameScreen.classList.add('lose-effect')
-      setTimeout(() => {
-        gameScreen.classList.remove('lose-effect')
-      }, 2000)
-    }
+    document.body.classList.add('lose-effect')
+    setTimeout(() => {
+      document.body.classList.remove('lose-effect')
+    }, 2000)
   }
   
   function showTieEffect() {
     // Effetto schermo giallo per pareggio
-    const gameScreen = document.querySelector('.game-screen')
-    if (gameScreen) {
-      gameScreen.classList.add('tie-effect')
-      setTimeout(() => {
-        gameScreen.classList.remove('tie-effect')
-      }, 2000)
-    }
+    document.body.classList.add('tie-effect')
+    setTimeout(() => {
+      document.body.classList.remove('tie-effect')
+    }, 2000)
   }
   
   function createParticles() {

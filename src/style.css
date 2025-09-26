@@ -8,9 +8,7 @@
 
 body {
   font-family: 'Nunito', sans-serif;
-  background: linear-gradient(45deg, #ff6b6b 0%, #4ecdc4 25%, #45b7d1 50%, #96ceb4 75%, #ffeaa7 100%);
-  background-size: 400% 400%;
-  animation: gradientShift 8s ease infinite;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -20,27 +18,26 @@ body {
   margin: 0;
 }
 
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
 body:has(.game-screen) {
   padding: 0;
   align-items: stretch;
+  /* Assicura lo stesso sfondo della game-screen */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  animation: none;
+  /* Assicura uno scroll fluido su tutti i browser */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Container per tutte le schermate */
 .intro-screen, .home-screen {
   max-width: 400px;
   width: 100%;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
+  background: transparent;
+  border-radius: 0;
   padding: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-  border: 2px solid #d4af37;
+  box-shadow: none;
+  border: none;
   min-height: 80vh;
   display: flex;
   flex-direction: column;
@@ -54,6 +51,8 @@ body:has(.game-screen) {
   text-align: center;
   min-height: 100vh;
   padding: 15px;
+  background: transparent;
+  border: none;
 }
 
 .intro-content {
@@ -109,10 +108,11 @@ body:has(.game-screen) {
 
 .game-screen {
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
+  height: auto;
   max-width: 100vw;
   margin: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: transparent;
   border-radius: 0;
   padding: 20px;
   box-shadow: none;
@@ -120,10 +120,8 @@ body:has(.game-screen) {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  overflow: hidden;
-  position: fixed;
-  top: 0;
-  left: 0;
+  overflow-y: auto;
+  position: relative;
 }
 
 /* Schermata Home */
@@ -691,6 +689,37 @@ body:has(.game-screen) {
   margin: 10px 0 5px 0;
   flex-wrap: wrap;
   padding-bottom: 5px;
+  position: relative;
+}
+
+/* Indicatore di scroll per dispositivi con altezza ridotta */
+.controls::before {
+  content: "⬆️ Scroll su/giù se non vedi tutto ⬇️";
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #ffd700;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  animation: scrollHint 3s ease-in-out infinite;
+}
+
+@keyframes scrollHint {
+  0%, 85%, 100% { opacity: 0; }
+  15%, 70% { opacity: 1; }
+}
+
+@media (min-height: 650px) {
+  .controls::before {
+    display: none;
+  }
 }
 
 .btn {
@@ -951,61 +980,166 @@ body:has(.game-screen) {
   }
 }
 
-/* Effetti grafici per vittoria/sconfitta */
-.game-screen.win-effect {
+/* Gestione di dispositivi con altezza ridotta */
+@media (max-height: 600px) {
+  .game-screen {
+    justify-content: flex-start;
+    gap: 10px;
+    min-height: 100vh;
+    padding-bottom: 80px; /* Spazio extra per i pulsanti */
+  }
+  
+  .dealer-section, .player-section {
+    flex: none;
+    min-height: auto;
+  }
+  
+  .cards-area {
+    min-height: 80px;
+    margin: 8px 0;
+  }
+  
+  .card {
+    width: 70px;
+    height: 95px;
+  }
+  
+  .card-suit-svg {
+    width: 45px;
+    height: 35px;
+  }
+  
+  .section-title {
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+  
+  .controls {
+    position: sticky;
+    bottom: 0;
+    background: rgba(102, 126, 234, 0.95);
+    backdrop-filter: blur(10px);
+    margin: 10px -20px 0 -20px;
+    padding: 15px 20px;
+    border-top: 2px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .message {
+    min-height: 30px;
+    font-size: 0.95rem;
+    margin: 5px 0;
+  }
+}
+
+/* Dispositivi extra piccoli o in landscape */
+@media (max-height: 500px) {
+  .game-screen {
+    padding: 5px;
+    padding-bottom: 70px;
+  }
+  
+  .game-header {
+    margin-bottom: 5px;
+  }
+  
+  .cards-area {
+    min-height: 60px;
+    margin: 5px 0;
+    gap: 5px;
+  }
+  
+  .card {
+    width: 60px;
+    height: 80px;
+  }
+  
+  .card-suit-svg {
+    width: 35px;
+    height: 28px;
+  }
+  
+  .card-value-top {
+    font-size: 1rem;
+  }
+  
+  .card-special-value {
+    font-size: 1.1rem;
+    padding: 2px 6px;
+  }
+  
+  .btn {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    min-width: 80px;
+  }
+  
+  .controls {
+    margin: 5px -5px 0 -5px;
+    padding: 10px 5px;
+    gap: 8px;
+  }
+  
+  .section-title {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+  }
+}
+
+/* Effetti grafici per vittoria/sconfitta applicati al body */
+body.win-effect {
   animation: winPulse 2s ease-out;
 }
 
-.game-screen.lose-effect {
+body.lose-effect {
   animation: losePulse 2s ease-out;
 }
 
-.game-screen.tie-effect {
+body.tie-effect {
   animation: tiePulse 2s ease-out;
 }
 
 @keyframes winPulse {
   0% { 
-    background: rgba(0, 0, 0, 0.4);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
   25% { 
-    background: rgba(0, 255, 0, 0.2);
+    background: linear-gradient(135deg, #a8e6cf 0%, #88d8a3 100%);
   }
   50% { 
-    background: rgba(0, 255, 0, 0.3);
+    background: linear-gradient(135deg, #a8e6cf 0%, #88d8a3 100%);
   }
   100% { 
-    background: rgba(0, 0, 0, 0.4);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
 }
 
 @keyframes losePulse {
   0% { 
-    background: rgba(0, 0, 0, 0.4);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
   25% { 
-    background: rgba(255, 0, 0, 0.2);
+    background: linear-gradient(135deg, #ffaaa5 0%, #ff8a80 100%);
   }
   50% { 
-    background: rgba(255, 0, 0, 0.3);
+    background: linear-gradient(135deg, #ffaaa5 0%, #ff8a80 100%);
   }
   100% { 
-    background: rgba(0, 0, 0, 0.4);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
 }
 
 @keyframes tiePulse {
   0% { 
-    background: rgba(0, 0, 0, 0.4);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
   25% { 
-    background: rgba(255, 215, 0, 0.2);
+    background: linear-gradient(135deg, #ffe082 0%, #ffcc02 100%);
   }
   50% { 
-    background: rgba(255, 215, 0, 0.3);
+    background: linear-gradient(135deg, #ffe082 0%, #ffcc02 100%);
   }
   100% { 
-    background: rgba(0, 0, 0, 0.4);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
 }
 
