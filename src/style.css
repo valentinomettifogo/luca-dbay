@@ -915,6 +915,16 @@ body:has(.game-screen) {
     height: 124px;
   }
   
+  .card-special-title {
+    font-size: 0.8rem;
+    padding: 2px 3px;
+  }
+  
+  .card-special-suit {
+    width: 22px;
+    height: 22px;
+  }
+  
   .card-suit {
     font-size: 1.5rem;
     margin-bottom: 5px;
@@ -1009,6 +1019,16 @@ body:has(.game-screen) {
     height: 35px;
   }
   
+  .card-special-title {
+    font-size: 0.75rem;
+    padding: 1px 3px;
+  }
+  
+  .card-special-suit {
+    width: 20px;
+    height: 20px;
+  }
+  
   .section-title {
     font-size: 1rem;
     margin-bottom: 8px;
@@ -1065,6 +1085,24 @@ body:has(.game-screen) {
   .card-special-value {
     font-size: 1.1rem;
     padding: 2px 6px;
+  }
+  
+  .card-special-title {
+    font-size: 0.65rem;
+    padding: 1px 2px;
+    line-height: 0.9;
+  }
+  
+  .card-special-header {
+    flex-direction: column;
+    gap: 2px;
+    align-items: flex-start;
+  }
+  
+  .card-special-suit {
+    width: 16px;
+    height: 16px;
+    align-self: flex-end;
   }
   
   .btn {
