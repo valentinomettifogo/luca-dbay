@@ -188,15 +188,38 @@ export function useBlackjackGame() {
       updatePlayerDisplayScore()
       
       const playerScoreValue = getHandValue(game.value.playerHand)
+      const dealerScoreValue = getHandValue(game.value.dealerHand)
       
-      // Controlla sforamento immediato (es: Fabrizio + qualsiasi altra carta)
-      if (playerScoreValue > 21) {
+      // Controlla prima se il dealer ha sforato (es: Fabrizio)
+      if (dealerScoreValue > 21) {
+        // Il dealer sfora automaticamente = player vince
+        game.value.wins++
+        game.value.currentStreak++
+        game.value.gameState = 'won'
+        // Rivela le carte del dealer per mostrare lo sforamento
+        game.value.dealerHidden = false
+        setTimeout(() => {
+          updateDealerDisplayScore()
+          if (game.value.wins >= 5) {
+            showFinalWinEffect()
+            setTimeout(() => {
+              createMegaParticles()
+              game.value.showCongratulations = true
+              game.value.currentScreen = 'intro'
+            }, 2000)
+          } else {
+            showWinEffect()
+          }
+        }, 800) // Tempo per vedere le carte del dealer
+      }
+      // Controlla sforamento del player (es: Fabrizio + qualsiasi altra carta)
+      else if (playerScoreValue > 21) {
         game.value.currentStreak = 0
         game.value.wins = 0
         game.value.gameState = 'lost'
         setTimeout(() => showLoseEffect(), 500)
       } 
-      // Controlla blackjack immediato
+      // Controlla blackjack immediato del player
       else if (playerScoreValue === 21) {
         setTimeout(() => playerStand(), 1000)
       }
