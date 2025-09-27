@@ -90,16 +90,30 @@ export function useBlackjackGame() {
     game.value.deck = []
     for (let suit of suits) {
       for (let value of values) {
-        // Carte speciali: 4 copie (una per ogni seme)
         if (value.special) {
-          game.value.deck.push({
-            suit: suit.symbol, // Le carte speciali hanno anche un seme
-            suitColor: suit.color,
-            value: value.symbol,
-            numValue: value.value,
-            special: true,
-            image: value.image
-          })
+          // Fabrizio: solo 1 copia per bilanciare il gameplay
+          if (value.symbol === 'FABRIZIO') {
+            if (suit.name === 'hearts') { // Solo una volta per il primo seme
+              game.value.deck.push({
+                suit: suit.symbol,
+                suitColor: suit.color,
+                value: value.symbol,
+                numValue: value.value,
+                special: true,
+                image: value.image
+              })
+            }
+          } else {
+            // DADO e MARCO: 4 copie (una per ogni seme)
+            game.value.deck.push({
+              suit: suit.symbol,
+              suitColor: suit.color,
+              value: value.symbol,
+              numValue: value.value,
+              special: true,
+              image: value.image
+            })
+          }
         } else {
           // Carte normali: una per ogni seme
           game.value.deck.push({
@@ -162,6 +176,9 @@ export function useBlackjackGame() {
   }
   
   function dealNewHand() {
+    // Rimuovi tutti gli effetti visivi dalle partite precedenti
+    document.body.classList.remove('win-effect', 'lose-effect', 'tie-effect')
+    
     // Reset se il mazzo è troppo piccolo
     if (game.value.deck.length < 20) {
       createDeck()
@@ -352,6 +369,9 @@ export function useBlackjackGame() {
 
   
   function continueGame() {
+    // Rimuovi tutti gli effetti visivi
+    document.body.classList.remove('win-effect', 'lose-effect', 'tie-effect')
+    
     // Continua il gioco dopo una vittoria - vai direttamente alla prossima partita
     game.value.currentScreen = 'game'
     // Avvia direttamente una nuova mano
@@ -359,6 +379,9 @@ export function useBlackjackGame() {
   }
   
   function backToStart() {
+    // Rimuovi tutti gli effetti visivi
+    document.body.classList.remove('win-effect', 'lose-effect', 'tie-effect')
+    
     // Torna alla schermata intro dopo una sconfitta
     game.value.currentScreen = 'intro'
     game.value.gameState = 'ready'
@@ -426,9 +449,6 @@ export function useBlackjackGame() {
   function showWinEffect() {
     // Effetto schermo verde per vittoria
     document.body.classList.add('win-effect')
-    setTimeout(() => {
-      document.body.classList.remove('win-effect')
-    }, 2000)
     
     createParticles()
   }
@@ -436,9 +456,6 @@ export function useBlackjackGame() {
   function showFinalWinEffect() {
     // Effetto speciale per la vittoria finale (quinta)
     document.body.classList.add('win-effect')
-    setTimeout(() => {
-      document.body.classList.remove('win-effect')
-    }, 2000)
     
     createParticles()
     
@@ -451,17 +468,11 @@ export function useBlackjackGame() {
   function showLoseEffect() {
     // Effetto schermo rosso per sconfitta
     document.body.classList.add('lose-effect')
-    setTimeout(() => {
-      document.body.classList.remove('lose-effect')
-    }, 2000)
   }
   
   function showTieEffect() {
     // Effetto schermo giallo per pareggio
     document.body.classList.add('tie-effect')
-    setTimeout(() => {
-      document.body.classList.remove('tie-effect')
-    }, 2000)
   }
   
   function createParticles() {
