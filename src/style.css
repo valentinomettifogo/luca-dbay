@@ -218,6 +218,62 @@ body:has(.game-screen) {
   background: linear-gradient(135deg, #a52a2a 0%, #ff1744 50%, #ffd700 100%);
 }
 
+/* Schermata scelta anno */
+.year-subtitle {
+  color: #f5f5f5;
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+
+.year-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.year-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 18px 24px;
+  border-radius: 15px;
+  border: 2px solid #d4af37;
+  background: rgba(139, 0, 0, 0.3);
+  color: #f5f5f5;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.year-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(212, 175, 55, 0.3);
+}
+
+.year-button--new {
+  background: linear-gradient(135deg, #8b0000 0%, #dc143c 50%, #d4af37 100%);
+}
+
+.year-number {
+  font-family: 'Bungee', cursive;
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.year-label {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.intro-content .back-button {
+  margin-top: 4px;
+}
+
 /* Header della schermata di gioco */
 .game-header {
   display: flex;
