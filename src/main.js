@@ -1,5 +1,5 @@
-import { createApp } from 'vue'
-import App from './App.vue'
+import { mount } from 'svelte'
+import App from './App.svelte'
 import './style.css'
 
-createApp(App).mount('#app')
+mount(App, { target: document.getElementById('app') })
