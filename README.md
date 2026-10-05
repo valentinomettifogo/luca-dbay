@@ -1,6 +1,6 @@
-# 🎉 Luca's Birthday Blackjack - Vue.js Edition
+# 🎉 Luca's Bday Game - Svelte Edition
 
-Un gioco di Blackjack a tema compleanno creato con Vue.js 3 e Vite, trasformato da un'applicazione HTML/JavaScript vanilla.
+Il sito di compleanno di Luca, un gioco diverso per ogni anno: il Blackjack (2025) e "Sopravvivi agli amici" (2026). Creato con Svelte 5 e Vite.
 
 ## 🎮 Caratteristiche
 
@@ -8,7 +8,7 @@ Un gioco di Blackjack a tema compleanno creato con Vue.js 3 e Vite, trasformato 
 - **Sistema di Ricompense**: Sblocca una sorpresa speciale vincendo 5 partite
 - **Animazioni**: Effetti visivi e particelle per le vittorie
 - **Responsive**: Design ottimizzato per desktop e mobile
-- **Vue.js 3**: Architettura moderna con Composition API
+- **Svelte 5**: Stato reattivo con le rune (`$state`, `$derived`)
 
 ## 🚀 Avvio Rapido
 
@@ -24,7 +24,7 @@ Un gioco di Blackjack a tema compleanno creato con Vue.js 3 e Vite, trasformato 
    
 3. **Apri nel browser:**
    ```
-   http://localhost:3000
+   http://localhost:5173
    ```
 
 ## 🏗️ Build per Produzione
@@ -35,19 +35,28 @@ npm run build
 
 I file pronti per la produzione saranno nella cartella `dist/`.
 
+## 🧪 Test e controlli
+
+```bash
+npm test        # test delle regole del Blackjack (Vitest)
+npm run check   # controllo dei componenti Svelte (svelte-check)
+```
+
 ## 📁 Struttura del Progetto
 
 ```
 src/
-├── components/          # Componenti Vue riutilizzabili
-│   ├── GameCard.vue    # Singola carta da gioco
-│   ├── GameControls.vue # Pulsanti di controllo
-│   ├── GameStats.vue   # Statistiche di gioco
-│   ├── ProgressBar.vue # Barra progresso sorpresa
-│   └── ScoreDisplay.vue # Display del punteggio
-├── composables/         # Logica di business riutilizzabile
-│   └── useBlackjackGame.js # Hook per la logica del Blackjack
-├── App.vue             # Componente principale
+├── games/
+│   ├── blackjack2025/
+│   │   ├── Blackjack2025.svelte  # Schermate del Blackjack
+│   │   ├── game.svelte.js        # Stato e flusso di gioco (rune)
+│   │   ├── rules.js              # Regole pure: mazzo, mescolamento, punteggio
+│   │   ├── rules.test.js         # Test delle regole
+│   │   └── components/           # GameCard, GameControls, ScoreDisplay
+│   └── survivor2026/
+│       ├── Survivor2026.svelte   # Guscio del gioco (DOM + stili)
+│       └── engine.js, ...        # Motore canvas in JS puro
+├── App.svelte          # Scelta dell'edizione (anno nell'hash: #2025 / #2026)
 ├── main.js             # Entry point dell'applicazione
 └── style.css           # Stili globali
 ```
@@ -60,29 +69,26 @@ src/
 - **Figure**: Valgono 10 punti
 - **Dealer**: Deve pescare fino ad almeno 17
 
-## ✨ Componenti Vue
+## ✨ Blackjack: com'è organizzato
 
-### `useBlackjackGame` (Composable)
-Contiene tutta la logica di gioco:
-- Gestione del mazzo e mescolamento
-- Logica del dealer e del giocatore
-- Calcolo punteggi e gestione assi
-- Sistema di vittorie e statistiche
+### `rules.js`
+Funzioni pure, senza stato né DOM: creazione e mescolamento del mazzo, calcolo del punteggio con gestione degli assi e delle carte speciali.
+
+### `game.svelte.js`
+Stato reattivo e flusso della partita: turni di player e dealer, vittorie consecutive, effetti e sorpresa finale.
 
 ### Componenti UI
 - **GameCard**: Rendering animato delle carte
-- **GameControls**: Pulsanti reattivi al stato di gioco
-- **GameStats**: Display delle statistiche
-- **ProgressBar**: Progresso verso la sorpresa
+- **GameControls**: Pulsanti reattivi allo stato di gioco
 - **ScoreDisplay**: Punteggio con stati speciali
 
 ## 🎨 Caratteristiche Tecniche
 
-- **Vue 3**: Composition API per logica reattiva
+- **Svelte 5**: Componenti compilati, reattività con le rune
 - **Vite**: Build tool veloce e moderno
 - **CSS Animations**: Transizioni fluide e effetti particellari
 - **Responsive Design**: Layout adattivo per tutti i dispositivi
-- **State Management**: Gestione stato reattivo con `ref` e `computed`
+- **State Management**: Stato reattivo con `$state` e `$derived`
 
 ## 🎊 Effetti Speciali
 
@@ -102,4 +108,4 @@ Contiene tutta la logica di gioco:
 
 **Buon Compleanno Luca! 🎂🎈**
 
-Trasformato in Vue.js con ❤️
+Riscritto in Svelte con ❤️
